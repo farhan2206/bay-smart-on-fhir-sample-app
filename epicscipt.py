@@ -10,8 +10,8 @@ import uuid
 def main():
     jti_value = str(uuid.uuid4())
     message = {
-        'iss': '6267b480-d0e8-445b-bc76-3691adc4ef04',
-        'sub': '6267b480-d0e8-445b-bc76-3691adc4ef04',
+        'iss': '96843565-cce9-4d38-b3f5-4ed8624b1795',
+        'sub': '96843565-cce9-4d38-b3f5-4ed8624b1795',
         'aud': 'https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token',
         'jti': jti_value,
         'iat': int(datetime.now(timezone.utc).timestamp()),
@@ -33,6 +33,8 @@ def main():
         'kid': kid_value,  # Set to the kid of the target public key
     }
 
+    print(headers)
+
     # Load the private key
     with open("privatekey.pem", "rb") as key_file:
         private_key_pem = key_file.read()
@@ -50,8 +52,10 @@ def main():
         'client_assertion_type': 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         'client_assertion': compact_jws
     }
-
+    print(data)
+    print(headers)
     response = requests.post('https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token', headers=headers, data=data)
+    print(response)
     print(response.text)
 
 if __name__ == "__main__":
