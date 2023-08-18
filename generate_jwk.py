@@ -1,22 +1,31 @@
-from cryptography.hazmat.primitives import serialization
+from cryptography.x509 import load_pem_x509_certificate
 from cryptography.hazmat.backends import default_backend
-from jwcrypto import jwk
+import json
+import hashlib
+import base64
 
-# Load the public key
-with open("./publickey.pem", "rb") as key_file:
-    public_key = serialization.load_pem_public_key(key_file.read(), backend=default_backend())
+# Load the X.509 public key
+with open("public509.pem", "rb") as key_file:
+    x509_cert_pem = key_file.read()
 
-# Create JWK from public key
-jwk_obj = jwk.JWK.from_pem(public_key.public_bytes(
-    encoding=serialization.Encoding.PEM,
-    format=serialization.PublicFormat.SubjectPublicKeyInfo
-))
+# Load the X.509 certificate
+x509_cert = load_pem_x509_certificate(x509_cert_pem, default_backend())
+public_key = x509_cert.public_key()
 
-# Convert JWK to dictionary
-jwk_dict = jwk_obj.export(as_dict=True)
+# Extract components of the public key
+n = public_key.public_numbers().n
+e = public_key.public_numbers().e
+
+# Construct the JWK
+jwk_dict = {
+    "kty": "RSA",
+    "n": n,
+    "e": e,
+    "kid": base64.urlsafe_b64encode(hashlib.sha256(n.to_bytes(256, 'big')).digest()).decode('utf-8')
+}
 
 # Save JWK as JSON file
 with open("jwk.json", "w") as jwk_file:
-    jwk_file.write(jwk_obj.export())
+    json.dump(jwk_dict, jwk_file, indent=4)
 
 print("JWK generated and saved as jwk.json")
