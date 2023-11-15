@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<script src='dist/fhir-client-v2.js'>
+	</script>
+</head>
+
+<body>
+	<p>Hello, I am the page "launch.html"</p>
+
+	<script>
+		FHIR.oauth2.authorize({
+      'client_id': '6eeb1b28-47d2-4674-8c98-9746c0e0ae7d',
+      'scope':  'PATIENT.READ, PATIENT.SEARCH, OBSERVATION.READ, OBSERVATION.SEARCH',
+      'redirect_uri': 'https://epic.patientdev.repl.co/app.html'
+    });
+	</script>
+
+</body>
+
+</html>
