@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<script src='dist/fhir-client-v2.js'>
+	</script>
+</head>
+
+<body>
+	<p>Hello, I am the page "launch.html"</p>
+
+	<script>
+		FHIR.oauth2.authorize({
+      'client_id': '3d5a8cfb-2011-4081-96bd-8e38895a7deb',
+      'scope':  'PATIENT.READ, PATIENT.SEARCH, OBSERVATION.READ, OBSERVATION.SEARCH',
+      'redirect_uri': 'https://raw.githack.com/farhan2206/bay-smart-on-fhir-sample-app/main/call.html'
+    });
+	</script>
+
+</body>
+
+</html>
