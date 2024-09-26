@@ -8,12 +8,12 @@ from requests.structures import CaseInsensitiveDict
 import uuid
 import base64
 
-def main():
+def get_access_token():
     jti_value = str(uuid.uuid4())
     oauth_token_url = 'https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token'
     message = {
-        'iss': '6267b480-d0e8-445b-bc76-3691adc4ef04',
-        'sub': '6267b480-d0e8-445b-bc76-3691adc4ef04',
+        'iss': '8274ef80-78f0-43b5-b433-55aebb061c12',
+        'sub': '8274ef80-78f0-43b5-b433-55aebb061c12',
         'aud': oauth_token_url,
         'jti': jti_value,
         'iat': int(datetime.now(timezone.utc).timestamp()),
@@ -55,7 +55,7 @@ def main():
     )
 
     # Encode the signature and data
-    encoded_signature = base64.urlsafe_b64encode(signature)
+    encoded_signature = base64.urlsafe_b64encode(signature).rstrip(b'=')
     
     # Construct the final JWT token
     encoded_data = data_to_sign + b'.' + encoded_signature
@@ -66,14 +66,239 @@ def main():
     data = {
         'grant_type': 'client_credentials',
         'client_assertion_type': 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        'client_assertion': encoded_data.decode().rstrip('=')  # Convert bytes to string
+        'client_assertion': encoded_data.decode()  # Convert bytes to string
     }
 
-    response = requests.request("POST", oauth_token_url, headers=headers, data=data)
+    response = requests.post(oauth_token_url, headers=headers, data=data)
     
-    # Store the response JSON payload in a variable
-    response_payload = response.json()
-    print(response_payload)
+    if response.status_code == 200:
+        response_payload = response.json()
+        print(response_payload)
+        return response_payload.get("access_token")
+    else:
+        print(f"Failed to obtain access token: {response.status_code}")
+        print(response.text)
+        return None
+    
+    
+def fetch_patient_data(access_token):
+    patient_api_url = 'https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/erXuFYUfucBZaryVksYEcMg3' #FHIRCAMILA PATIENT FROM TESTING SANDBOX ENV
+    headers = CaseInsensitiveDict()
+    headers['Authorization'] = f'Bearer {access_token}'
+    headers['Accept'] = 'application/json'
+
+    response = requests.get(patient_api_url, headers=headers)
+    if response.status_code == 200:
+        patient_data = response.json()
+        return patient_data
+    else:
+        print(f"Failed to fetch patient data: {response.status_code}")
+        print(response.text)
+        return None
+    
+def fetch_patient_appointment(access_token):
+    appointment_patient_api_url = 'https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Appointment?patient=erXuFYUfucBZaryVksYEcMg3&service-category=appointment' #FHIRCAMILA PATIENT APPOINTMENT FROM TESTING SANDBOX ENV
+    headers = CaseInsensitiveDict()
+    headers['Authorization'] = f'Bearer {access_token}'
+    headers['Accept'] = 'application/json'
+
+    response = requests.get(appointment_patient_api_url, headers=headers)
+    if response.status_code == 200:
+        appointment_data = response.json()
+        return appointment_data
+    else:
+        print(f"Failed to fetch patient data: {response.status_code}")
+        print(response.text)
+        return None
+        
+
+def checkAppointments(access_token): 
+    appointment_find_url = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/STU3/Appointment/$find"
+    headers = CaseInsensitiveDict()
+    headers['Authorization'] = f'Bearer {access_token}'
+    headers['Content-Type'] = 'application/json'
+    headers['Accept'] = 'application/json'
+
+    data = {
+        "resourceType": "Parameters",
+        "parameter": [
+            {
+                "name": "patient",
+                "resource": {
+                    "resourceType": "Patient",
+                    "identifier": [
+                        {
+                            "use": "usual",
+                            "type": {"text": "EPI"},
+                            "system": "urn:oid:1.2.840.114350",
+                            "value": "61789"
+                        },
+                        {
+                            "use": "usual",
+                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.5.737384.4399",
+                            "value": "8806001"
+                        },
+                        {
+                            "use": "usual",
+                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.5.737384.677",
+                            "value": "6945194984568464"
+                        }
+                    ],
+                    "active": True,
+                    "name": [
+                        {
+                            "use": "usual",
+                            "text": "Legendary Fhir D Cds Jr., Esq.",
+                            "family": "Cds",
+                            "given": ["Fhir", "D"],
+                            "prefix": ["Legendary"],
+                            "suffix": ["JR.", "ESQ."]
+                        }
+                    ],
+                    "telecom": [
+                        {"system": "phone", "value": "555-444-5544", "use": "home"},
+                        {"system": "phone", "value": "608-555-5555", "use": "work"},
+                        {"system": "email", "value": "fsdf@hmail.org"}
+                    ],
+                    "gender": "male",
+                    "birthDate": "1993-04-05",
+                    "address": [
+                        {
+                            "use": "home",
+                            "line": ["123 S West"],
+                            "city": "RWQA After Search",
+                            "district": "WASHINGTON",
+                            "state": "OR",
+                            "postalCode": "97106",
+                            "country": "USA"
+                        }
+                    ],
+                    "maritalStatus": {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/ValueSet/marital-status",
+                                "code": "A",
+                                "display": "Annulled"
+                            }
+                        ],
+                        "text": "Single"
+                    },
+                    "generalPractitioner": [
+                        {
+                            "reference": "https://hostname/instance/api/FHIR/STU3/Practitioner/eWF2MHob0wh095y6qi.omnA3",
+                            "display": "John Cena, Rap God"
+                        },
+                        {
+                            "reference": "https://hostname/instance/api/FHIR/STU3/Practitioner/eCzANnfrpW1tfiStYBosc7Q3",
+                            "display": "Bender Rodriguez"
+                        }
+                    ],
+                    "managingOrganization": {
+                        "reference": "https://hostname/instance/api/FHIR/STU3/Organization/eJr2Age0AyrEID2qZgA4C4F-d3Wwb900WJUnxWHulRLQ3",
+                        "display": "CVQA PACIFIC SERVICE AREA"
+                    }
+                }
+            },
+            {"name": "startTime", "valueDateTime": "2018-07-30T18:15:50Z"},
+            {"name": "endTime", "valueDateTime": "2018-08-04T18:13:12Z"},
+            {
+                "name": "serviceType",
+                "valueCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.3.808267.11",
+                            "code": "40111223",
+                            "display": "CDS Office Visit"
+                        },
+                        {
+                            "system": "DNPRC6",
+                            "code": "159",
+                            "display": "CDS Office Visit"
+                        }
+                    ],
+                    "text": "CDS Office Visit"
+                }
+            },
+            {
+                "name": "indications",
+                "valueCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "urn:oid:2.16.840.1.113883.6.96",
+                            "code": "46866001",
+                            "display": "Fracture of lower limb (disorder)"
+                        },
+                        {
+                            "system": "urn:oid:2.16.840.1.113883.6.90",
+                            "code": "S82.90XA",
+                            "display": "Broken leg"
+                        },
+                        {
+                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.2.696871",
+                            "code": "121346631",
+                            "display": "Broken leg"
+                        }
+                    ],
+                    "text": "Broken leg"
+                }
+            },
+            {
+                "name": "specialties",
+                "valueCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4150",
+                            "code": "20",
+                            "display": "Gastroenterology"
+                        },
+                        {
+                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.10.686980.110",
+                            "code": "10",
+                            "display": "Gastroenterology"
+                        }
+                    ],
+                    "text": "Gastroenterology"
+                }
+            },
+            {
+                "name": "location-reference",
+                "valueReference": {"reference": "https://hostname/instance/api/FHIR/STU3/Location/eULujY-VWnFz-tbLqZ39RjA3"}
+            },
+            {
+                "name": "time-of-day",
+                "valueTiming": {"repeat": {"duration": 10, "durationUnit": "min", "dayOfWeek": ["thu", "tue"], "timeOfDay": ["01:00:00"]}}
+            },
+            {
+                "name": "time-of-day",
+                "valueTiming": {"repeat": {"duration": 30, "durationUnit": "min", "dayOfWeek": ["thu", "tue"], "timeOfDay": ["02:00:00"]}}
+            }
+        ]
+    }
+
+    # Send the POST request
+    response = requests.post(url=appointment_find_url, headers=headers, data=json.dumps(data))
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        print("Request was successful!")
+        return response.json()
+    else:
+        print(f"Request failed with status code {response.status_code}")
+        print("Response:", response.text)
+        return None
+
+def main():
+    access_token = get_access_token()
+    if access_token:
+        patient_data = fetch_patient_data(access_token)
+        if patient_data:
+            print(json.dumps(patient_data, indent=2))
+        
+        print("#####################################################################################################################################################")
+            
+        # appointment_data = fetch_patient_appointment(access_token)
+        # if appointment_data:
+        #     print(json.dumps(appointment_data, indent=2))
 
 if __name__ == "__main__":
     main()
