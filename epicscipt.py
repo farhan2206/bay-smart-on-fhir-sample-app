@@ -7,6 +7,8 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from requests.structures import CaseInsensitiveDict
 import uuid
 import base64
+from datetime import datetime
+
 
 def get_access_token():
     jti_value = str(uuid.uuid4())
@@ -82,7 +84,7 @@ def get_access_token():
     
     
 def fetch_patient_data(access_token):
-    patient_api_url = 'https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/erXuFYUfucBZaryVksYEcMg3' #FHIRCAMILA PATIENT FROM TESTING SANDBOX ENV
+    patient_api_url = 'https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/STU3/Patient/erXuFYUfucBZaryVksYEcMg3' #FHIRCAMILA PATIENT FROM TESTING SANDBOX ENV
     headers = CaseInsensitiveDict()
     headers['Authorization'] = f'Bearer {access_token}'
     headers['Accept'] = 'application/json'
@@ -97,7 +99,7 @@ def fetch_patient_data(access_token):
         return None
     
 def fetch_patient_appointment(access_token):
-    appointment_patient_api_url = 'https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Appointment?patient=erXuFYUfucBZaryVksYEcMg3&service-category=appointment' #FHIRCAMILA PATIENT APPOINTMENT FROM TESTING SANDBOX ENV
+    appointment_patient_api_url = 'https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/STU3/Appointment?patient=erXuFYUfucBZaryVksYEcMg3&service-category=appointment' #FHIRCAMILA PATIENT APPOINTMENT FROM TESTING SANDBOX ENV
     headers = CaseInsensitiveDict()
     headers['Authorization'] = f'Bearer {access_token}'
     headers['Accept'] = 'application/json'
@@ -111,7 +113,6 @@ def fetch_patient_appointment(access_token):
         print(response.text)
         return None
         
-
 def checkAppointments(access_token): 
     appointment_find_url = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/STU3/Appointment/$find"
     headers = CaseInsensitiveDict()
@@ -119,161 +120,7 @@ def checkAppointments(access_token):
     headers['Content-Type'] = 'application/json'
     headers['Accept'] = 'application/json'
 
-    data = {
-        "resourceType": "Parameters",
-        "parameter": [
-            {
-                "name": "patient",
-                "resource": {
-                    "resourceType": "Patient",
-                    "identifier": [
-                        {
-                            "use": "usual",
-                            "type": {"text": "EPI"},
-                            "system": "urn:oid:1.2.840.114350",
-                            "value": "61789"
-                        },
-                        {
-                            "use": "usual",
-                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.5.737384.4399",
-                            "value": "8806001"
-                        },
-                        {
-                            "use": "usual",
-                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.5.737384.677",
-                            "value": "6945194984568464"
-                        }
-                    ],
-                    "active": True,
-                    "name": [
-                        {
-                            "use": "usual",
-                            "text": "Legendary Fhir D Cds Jr., Esq.",
-                            "family": "Cds",
-                            "given": ["Fhir", "D"],
-                            "prefix": ["Legendary"],
-                            "suffix": ["JR.", "ESQ."]
-                        }
-                    ],
-                    "telecom": [
-                        {"system": "phone", "value": "555-444-5544", "use": "home"},
-                        {"system": "phone", "value": "608-555-5555", "use": "work"},
-                        {"system": "email", "value": "fsdf@hmail.org"}
-                    ],
-                    "gender": "male",
-                    "birthDate": "1993-04-05",
-                    "address": [
-                        {
-                            "use": "home",
-                            "line": ["123 S West"],
-                            "city": "RWQA After Search",
-                            "district": "WASHINGTON",
-                            "state": "OR",
-                            "postalCode": "97106",
-                            "country": "USA"
-                        }
-                    ],
-                    "maritalStatus": {
-                        "coding": [
-                            {
-                                "system": "http://hl7.org/fhir/ValueSet/marital-status",
-                                "code": "A",
-                                "display": "Annulled"
-                            }
-                        ],
-                        "text": "Single"
-                    },
-                    "generalPractitioner": [
-                        {
-                            "reference": "https://hostname/instance/api/FHIR/STU3/Practitioner/eWF2MHob0wh095y6qi.omnA3",
-                            "display": "John Cena, Rap God"
-                        },
-                        {
-                            "reference": "https://hostname/instance/api/FHIR/STU3/Practitioner/eCzANnfrpW1tfiStYBosc7Q3",
-                            "display": "Bender Rodriguez"
-                        }
-                    ],
-                    "managingOrganization": {
-                        "reference": "https://hostname/instance/api/FHIR/STU3/Organization/eJr2Age0AyrEID2qZgA4C4F-d3Wwb900WJUnxWHulRLQ3",
-                        "display": "CVQA PACIFIC SERVICE AREA"
-                    }
-                }
-            },
-            {"name": "startTime", "valueDateTime": "2018-07-30T18:15:50Z"},
-            {"name": "endTime", "valueDateTime": "2018-08-04T18:13:12Z"},
-            {
-                "name": "serviceType",
-                "valueCodeableConcept": {
-                    "coding": [
-                        {
-                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.3.808267.11",
-                            "code": "40111223",
-                            "display": "CDS Office Visit"
-                        },
-                        {
-                            "system": "DNPRC6",
-                            "code": "159",
-                            "display": "CDS Office Visit"
-                        }
-                    ],
-                    "text": "CDS Office Visit"
-                }
-            },
-            {
-                "name": "indications",
-                "valueCodeableConcept": {
-                    "coding": [
-                        {
-                            "system": "urn:oid:2.16.840.1.113883.6.96",
-                            "code": "46866001",
-                            "display": "Fracture of lower limb (disorder)"
-                        },
-                        {
-                            "system": "urn:oid:2.16.840.1.113883.6.90",
-                            "code": "S82.90XA",
-                            "display": "Broken leg"
-                        },
-                        {
-                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.2.696871",
-                            "code": "121346631",
-                            "display": "Broken leg"
-                        }
-                    ],
-                    "text": "Broken leg"
-                }
-            },
-            {
-                "name": "specialties",
-                "valueCodeableConcept": {
-                    "coding": [
-                        {
-                            "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4150",
-                            "code": "20",
-                            "display": "Gastroenterology"
-                        },
-                        {
-                            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.10.686980.110",
-                            "code": "10",
-                            "display": "Gastroenterology"
-                        }
-                    ],
-                    "text": "Gastroenterology"
-                }
-            },
-            {
-                "name": "location-reference",
-                "valueReference": {"reference": "https://hostname/instance/api/FHIR/STU3/Location/eULujY-VWnFz-tbLqZ39RjA3"}
-            },
-            {
-                "name": "time-of-day",
-                "valueTiming": {"repeat": {"duration": 10, "durationUnit": "min", "dayOfWeek": ["thu", "tue"], "timeOfDay": ["01:00:00"]}}
-            },
-            {
-                "name": "time-of-day",
-                "valueTiming": {"repeat": {"duration": 30, "durationUnit": "min", "dayOfWeek": ["thu", "tue"], "timeOfDay": ["02:00:00"]}}
-            }
-        ]
-    }
+    data = {"resourceType":"Parameters","parameter":[{"name":"patient","resource":{"resourceType":"Patient","extension":[{"valueCode":"M","url":"http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex"},{"extension":[{"valueCoding":{"system":"http://hl7.org/fhir/us/core/ValueSet/omb-race-category","code":"2106-3","display":"White"},"url":"ombCategory"},{"valueString":"White","url":"text"}],"url":"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"},{"extension":[{"valueCoding":{"system":"http://hl7.org/fhir/us/core/ValueSet/omb-ethnicity-category","code":"UNK","display":"Unknown"},"url":"ombCategory"},{"valueString":"Unknown","url":"text"}],"url":"http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"}],"identifier":[{"use":"usual","type":{"text":"EPIC"},"system":"urn:oid:1.2.840.114350.1.1","value":"E3423"},{"use":"usual","type":{"text":"MRN"},"system":"urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14","value":"203177"}],"active":"true","name":[{"use":"usual","text":"Correct Professional Billing","family":"Professional Billing","given":["Correct"]}],"telecom":[{"system":"phone","value":"608-271-9000","use":"home"},{"system":"phone","value":"608-271-9000","use":"work"}],"gender":"male","birthDate":"1983-06-08","address":[{"use":"home","line":["1979 Milky Way"],"city":"VERONA","district":"DANE","state":"WI","postalCode":"53593","country":"US"}],"maritalStatus":{"text":"Single"},"communication":[{"language":{"coding":[{"system":"http://hl7.org/fhir/ValueSet/languages","code":"en","display":"English"}],"text":"English"},"preferred":"true"}],"generalPractitioner":[{"reference":"https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Practitioner/eM5CWtq15N0WJeuCet5bJlQ3","display":"Physician Family Medicine, MD"}],"managingOrganization":{"reference":"https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Organization/enRyWnSP963FYDpoks4NHOA3","display":"Epic Hospital System"}}},{"name":"startTime","valueDateTime":"2024-05-01T13:00:00Z"},{"name":"endTime","valueDateTime":"2028-05-05T22:00:00Z"},{"name":"serviceType","valueCodeableConcept":{"coding":[{"system":"urn:oid:1.2.840.114350.1.13.0.1.7.3.808267.11","code":"95014","display":"Office Visit"}]}},{"name":"indications","valueCodeableConcept":{"coding":[{"system":"urn:oid:2.16.840.1.113883.6.96","code":"46866001","display":"Fracture of lower limb (disorder)"},{"system":"urn:oid:2.16.840.1.113883.6.90","code":"S82.90XA","display":"Broken leg"},{"system":"urn:oid:1.2.840.114350.1.13.861.1.7.2.696871","code":"121346631","display":"Broken leg"}],"text":"Broken leg"}},{"name":"location-reference","valueReference":{"reference":"https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Location/e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"}}]}
 
     # Send the POST request
     response = requests.post(url=appointment_find_url, headers=headers, data=json.dumps(data))
@@ -286,6 +133,71 @@ def checkAppointments(access_token):
         print(f"Request failed with status code {response.status_code}")
         print("Response:", response.text)
         return None
+    
+def find_appointments(access_token, start_date, end_date):
+    # Convert strings to datetime objects if necessary
+    if isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    if isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+    # Format dates to FHIR-compatible format (YYYY-MM-DD)
+    start_date_str = start_date.strftime('%Y-%m-%d')
+    end_date_str = end_date.strftime('%Y-%m-%d')
+
+    # Construct the FHIR search URL
+    appointment_patient_api_url = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/STU3/Appointment"
+    
+    # Define the search parameters
+    params = {
+        'patient': 'erXuFYUfucBZaryVksYEcMg3',
+        'date': f"{start_date_str}|{end_date_str}"
+    }
+    
+    try:
+        # Make the GET request to the FHIR server
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Accept': 'application/json'
+        }
+
+        response = requests.get(appointment_patient_api_url, headers=headers, params=params)
+        if response.status_code == 200:
+            appointment_data = response.json()
+            return appointment_data
+        else:
+            print(f"Failed to fetch patient data: {response.status_code}")
+            print(response.text)
+            return None
+    
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        return []
+
+def create_appointment(access_token, appointment_data):
+    # Construct the FHIR URL for creating an Appointment
+    create_appointment_url = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/STU3/Appointment/$book"
+    # Set the headers for the request
+    headers = CaseInsensitiveDict()
+    headers['Authorization'] = f'Bearer {access_token}'
+    headers['Content-Type'] = 'application/fhir+json'
+    headers['Accept'] = 'application/json'
+
+    try:
+        # Send the POST request
+        response = requests.post(url=create_appointment_url, headers=headers, json=appointment_data)
+        if response.status_code in [200, 201]:  # Check for success (200 OK or 201 Created)
+            appointment_created_data = response.json()
+            return appointment_created_data
+        else:
+            print(f"Failed to create appointment: {response.status_code}")
+            print(response.text)
+            return None
+    
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        return []
+
 
 def main():
     access_token = get_access_token()
@@ -299,6 +211,41 @@ def main():
         # appointment_data = fetch_patient_appointment(access_token)
         # if appointment_data:
         #     print(json.dumps(appointment_data, indent=2))
+        # start_date = datetime(2024, 9, 27)
+        # end_date = datetime(2024, 9, 27)
+        # appointment_data = find_appointments(access_token, start_date, end_date)
+        appointment_data = checkAppointments(access_token)
+        if appointment_data:
+            print(json.dumps(appointment_data, indent=2))
+        
+        print("#####################################################################################################################################################")
+        
+        appointment_data = {
+        "resourceType": "Parameters",
+        "parameter": [
+            {
+            "name": "patient",
+            "valueIdentifier": {
+                "value": "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/STU3/Patient/ev4L1e2V1ZwRwejbW-AxlHQ3"
+            }
+            },
+            {
+            "name": "appointment",
+            "valueIdentifier": {
+                "value": "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Appointment/enALxdm6GUiZGPFjWlTfGYepp5iqTDMV6KKvcg9ATaMJTKA3u5KsVeSYjQ.E0TafK3"
+            }
+            },
+            {
+            "name": "appointmentNote",
+            "valueString": "Note text containing info related to the appointment."
+            }
+        ]
+        }
+
+        
+        appointment_created_data = create_appointment(access_token, appointment_data)
+        if appointment_created_data:
+            print(json.dumps(appointment_data, indent=2))
 
 if __name__ == "__main__":
     main()
