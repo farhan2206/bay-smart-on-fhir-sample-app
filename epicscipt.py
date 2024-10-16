@@ -198,6 +198,22 @@ def create_appointment(access_token, appointment_data):
         print(f"An error occurred: {e}")
         return []
 
+def fetch_practioner_data(access_token):
+    practioner_api_url = 'https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/STU3/Practitioner/eM5CWtq15N0WJeuCet5bJlQ3' #FHIRCAMILA Practioner FROM TESTING SANDBOX ENV
+    headers = CaseInsensitiveDict()
+    headers['Authorization'] = f'Bearer {access_token}'
+    headers['Accept'] = 'application/json'
+
+    response = requests.get(practioner_api_url, headers=headers)
+    if response.status_code == 200:
+        practioner_data = response.json()
+        return practioner_data
+    else:
+        print(f"Failed to fetch practioner data: {response.status_code}")
+        print(response.text)
+        return None
+
+
 
 def main():
     access_token = get_access_token()
@@ -207,7 +223,11 @@ def main():
             print(json.dumps(patient_data, indent=2))
         
         print("#####################################################################################################################################################")
-            
+        
+        practioner_data = fetch_practioner_data(access_token)
+        if practioner_data:
+            print(json.dumps(practioner_data, indent =2))
+        print("#####################################################################################################################################################")    
         # appointment_data = fetch_patient_appointment(access_token)
         # if appointment_data:
         #     print(json.dumps(appointment_data, indent=2))
